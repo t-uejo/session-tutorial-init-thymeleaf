@@ -17,6 +17,7 @@ package com.example.session.app.account;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import com.example.session.domain.model.Account;
 
@@ -24,10 +25,15 @@ import com.example.session.domain.model.Account;
 public interface AccountMapper {
 
     @Mapping(target = "id", ignore = true)
+    //TODO:なぜencodedPasswordをignoreしているのか？
     @Mapping(target = "encodedPassword", ignore = true)
     @Mapping(target = "cardNumber", ignore = true)
     @Mapping(target = "cardExpirationDate", ignore = true)
     @Mapping(target = "cardSecurityCode", ignore = true)
     Account map(AccountCreateForm form);
+    
+    @Mapping(target = "encodedPassword", ignore = true)
+    Account map(AccountUpdateForm form);
 
+    void map(Account account, @MappingTarget AccountUpdateForm form);
 }
