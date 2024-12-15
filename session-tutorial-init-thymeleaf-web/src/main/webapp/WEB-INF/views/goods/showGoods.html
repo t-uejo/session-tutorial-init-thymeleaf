@@ -42,6 +42,13 @@
             <tr th:each="goods, status : ${page.content}">
                 <td><a th:id="${goods.name}" th:href="@{/goods/{id}(id=${goods.id})}" th:text="${goods.name}"></a></td>
                 <td th:text="|&yen;${#numbers.formatInteger(goods.price, 1, 'COMMA')}|"></td>
+				<td>
+                    <form method="post" th:action="@{/goods/addToCart}" th:object="${goodAddForm}">
+                        <input type="text" name="quantity" th:id="|quantity${status.index}|" value="1" />
+                        <input type="hidden" name="goodsId" th:value="${goods.id}" />
+                        <input type="submit" th:id="|add${status.index}|" value="add" />
+                    </form>
+                </td>
             </tr>
         </table>
         <div class="paginationPart" th:object="${page}">
@@ -72,6 +79,23 @@
             [[${page.number + 1}]] / [[${page.totalPages}]] Pages
         </p>
     </div>
-
+	
+	<div>
+        <form method="get" th:action="@{/cart}">
+            <input type="submit" id="viewCart" value="view cart" />
+        </form>
+        <table>
+            <tr th:each="cartItem, status : ${@cart.cartItems}" th:object="${cartItem}">
+                <td th:id="|itemName${status.index}|" th:text="*{goods.name}"></td>
+                <td th:id="|itemPrice${status.index}|" th:text="|&yen;*{#numbers.formatInteger(goods.price, 1, 'COMMA')}|"></td>
+                <td th:id="|itemQuantity${status.index}|" th:text="*{quantity}"></td>
+            </tr>
+            <tr>
+                <td>Total</td>
+                <td id="totalPrice" th:text="|&yen;${#numbers.formatInteger(@cart.totalAmount, 1, 'COMMA')}|"></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>
