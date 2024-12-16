@@ -18,6 +18,7 @@ package com.example.session.app.goods;
 import jakarta.inject.Inject;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,6 +46,9 @@ public class GoodsController {
     
     @Inject
     Cart cart;
+    
+    @Inject
+    GoodsSearchCriteria criteria;
 
     @ModelAttribute(value = "goodViewForm")
     public GoodViewForm setUpCategoryId() {
@@ -52,16 +56,33 @@ public class GoodsController {
     }
 
     @GetMapping
-    public String showGoods(GoodViewForm form, Pageable pageable, Model model) {
+    public String showGoods(GoodViewForm form, Model model) {
+        Pageable pageable = PageRequest.of(criteria.getPage(), 3);
+        form.setCategoryId(criteria.getCategoryId());
+        return showGoods(pageable, model);
+    }
+    
+    @GetMapping(params = "categoryId")
+    public String changeCategoryId(
+    		GoodViewForm form, 
+    		Pageable pageable,
+            Model model) {
+        criteria.setPage(pageable.getPageNumber());
+        criteria.setCategoryId(form.getCategoryId());
+        return showGoods(pageable, model);
+    }
 
-        Page<Goods> page = goodsService.findByCategoryId(form.getCategoryId(),
-                pageable);
-        model.addAttribute("page", page);
-        return "goods/showGoods";
+    @GetMapping(params = "page")
+    public String changePage(GoodViewForm form, Pageable pageable,
+            Model model) {
+        criteria.setPage(pageable.getPageNumber());
+        form.setCategoryId(criteria.getCategoryId());
+        return showGoods(pageable, model);
     }
 
     @GetMapping("/{goodsId}")
-    public String showGoodsDetail(@PathVariable("goodsId") String goodsId,
+    public String showGoodsDetail(
+    		@PathVariable("goodsId") String goodsId,
             Model model) {
 
         Goods goods = goodsService.findOne(goodsId);
@@ -91,5 +112,11 @@ public class GoodsController {
         cart.add(cartItem);
 
         return "redirect:/goods";
+    }
+    
+    String showGoods(Pageable pageable, Model model) {
+        Page<Goods> page = goodsService.findByCategoryId(criteria.getCategoryId(), pageable);
+        model.addAttribute("page", page);
+        return "goods/showGoods";
     }
 }
